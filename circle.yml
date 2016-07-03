@@ -1,0 +1,15 @@
+machine:
+  services:
+    - docker
+dependencies:
+  cache_directories:
+    - "~/openapphack-docker-mysql"
+  override:
+    - docker info
+    - if [[ -e ~/openapphack-docker-mysql/image.tar ]]; then docker load --input ~/openapphack-docker-mysql/image.tar; fi
+    - docker build -t openapphack/mysql .
+    - mkdir -p ~/openapphack-docker-mysql; docker save --output ~/openapphack-docker-mysql/image.tar openapphack/mysql
+test:
+  override:
+    - docker run --name=mysql -d openapphack/mysql; sleep 10
+    - docker run --volumes-from=mysql openapphack/mysql mysqladmin status
